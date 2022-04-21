@@ -1,0 +1,72 @@
+version: '3.9'
+
+services:
+
+  frontend:
+    build: 
+     context: ./frontend
+     dockerfile: dockerfile
+    container_name: frontend_comparater
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    networks:
+      - comparater_net
+    
+               
+  backend: 
+    build: 
+     context: ./backend
+     dockerfile: dockerfile
+    container_name: bakend_comparater 
+    depends_on:
+      - mongodb
+      - cache
+    ports:
+      - "3001:3001"
+    networks:
+      -  comparater_net
+    volumes:
+    
+      - /backend/node_modules
+      - ./backend/src:/backend/src  
+  
+
+  mongodb: 
+      image: mongo     
+      restart: always
+      ports:
+       - "27018:27018"
+      volumes:
+       - mongo-data:/data/db 
+      networks:
+         - comparater_net
+     
+  cache:
+    image: redis:alpine
+    restart: always
+    ports:
+      - '6378:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes: 
+      - cache:/data
+    networks:
+      - comparater_net
+       
+volumes:
+  mongo-data:
+    name: mongo-data
+  cache: 
+    name: cache
+
+networks:
+   comparater_net:
+     driver: bridge
+     name: docker_pirate_net
+         
+    
+
+
+    
+         
